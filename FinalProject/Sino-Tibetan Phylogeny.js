@@ -1,4 +1,4 @@
-[
+var data = [
   {
     "ID": 1,
     "Name": "Achang",
