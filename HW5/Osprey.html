@@ -1,0 +1,127 @@
+<html>
+    <style>
+
+/* <!-- ************** THES LINES ARE NEW ***************** --> */
+
+    /* code from https://www.w3schools.com/howto/howto_js_rangeslider.asp */
+    
+    .slidecontainer {
+    width: 100%;
+    }
+
+    .slider {
+    -webkit-appearance: none;
+    width: 50%;
+    height: 25px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    }
+
+    .slider:hover {
+    opacity: 1;
+    }
+
+    .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+    }
+
+    .slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+    }
+
+    /* <!-- ******************************* --> */
+
+</style>
+
+    <head>
+        <title>American Osprey Sightings 2024</title>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+        integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+        crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+        integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+        crossorigin=""></script>
+        <script src="./data/ospreysinorder.geojson" ></script>
+
+    </head>
+    <style>
+        #mapid{ width: 900px; height: 500px; }
+    </style>
+
+
+    <body>
+
+    American Osprey Sightings 2024 Slider 
+    <div class="slidecontainer">
+        <input type="range" min="1" max="1000" value="1" class="slider" id="myRange">
+         Date: <span id="demo"></span>
+    </div>
+
+    <div id="mapid"></div>
+    
+ 
+
+    <script>  
+
+
+    var map = L.map('mapid').setView([39.81, -98.56], 2.5); // YOU CAN CHANGE THE ZOOM
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+    
+
+    var ospreyIcon = L.icon({    // notice the L.icon which is a Leaflet object with properties
+        iconUrl: './data/Osprey.svg',   
+          // this points to a jpg image obtained from the internet
+        iconSize: [15,15], // size of the icon
+        popupAnchor: [0,0] // where the icon is located relative to the lat lon of the point. 
+        });
+
+   
+    var ospreySightings = L.geoJSON(pts.features[0], { // open just the first instance of the geojson; that is why I added the []
+        pointToLayer: function (feature, latlng) { 
+        return L.marker(latlng, {icon: ospreyIcon});}
+        }).addTo(map);
+    map.addLayer(ospreySightings) 
+
+
+    
+ // **********  THIS SECTION IS WHERE MOST CHANGES ARE HAPPENING IN THE JS 
+
+    var slider = document.getElementById("myRange");
+    var output = document.getElementById("demo");
+
+    slider.oninput = function() { // in this example I am adding the oninput method after the slider element has been created. 
+          //alert(this.value); // example for debugging 
+        output.innerHTML = pts.features[(this.value-1)].properties.observed_on; // get the date value and assign it to the text
+        map.removeLayer(ospreySightings);// remove the hurricane layer otherwise it will keep adding more and more elements
+        ospreySightings = L.geoJSON(pts.features.slice(0,this.value), // select the values from 0 to the slider input using the slice array method
+        {pointToLayer: function (feature, latlng) { 
+        return L.marker(latlng, {icon: ospreyIcon});}}); 
+        map.addLayer(ospreySightings); 
+        }
+
+        window.onload = function() {
+            slider.value = 1;  
+    }; // I added this section to make sure that the slider goes back to the initial event after refreshing   
+    // end of script
+    </script>
+    </body>
+    <!-- ************************added this line since I did not pay for the icon ***************** -->
+    <div>Osprey icon made by <a href="https://www.freepik.com/author/brgfx" title="brgfx">brgfx</a> from <a href="https://www.freepik.com/free-vector/sticker-template-hawk-cartoon-character_18755158.htm#fromView=keyword&page=1&position=13&uuid=e46693f3-1acd-4e1e-9b35-d284888604f6&query=Osprey+Svg" 			    title="Freepik">www.freepik.com</a> </div>
+    
+    </html>
+
+
