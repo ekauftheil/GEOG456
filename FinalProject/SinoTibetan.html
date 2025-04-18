@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sino-Tibetan Language Phylogeny</title>
+   
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+    integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+    crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+    integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+    crossorigin=""></script>
+    <script src="./data/LanguagesPoints.js" ></script>
+   
+<style>
+.slidecontainer {
+    width: 100%;
+    }
+
+    .slider {
+    -webkit-appearance: none;
+    width: 60%;
+    height: 25px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    }
+
+    .slider:hover {
+    opacity: 1;
+    }
+
+    .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+    }
+
+    .slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+    }
+
+body{
+    background-color: lightcoral;
+}
+
+#container {
+            display: flex;
+            width: 95vw;
+            height: 100vh;
+        }
+#map{height: 550px;
+    width: 70% ;background-color: red;}
+#phylogenetictree {
+        border: 1px solid black;
+        display: flex;
+        align-items: flex-end;
+        height: 550px;
+        width: 30%;
+    background-color: aqua;}
+
+span{
+color: black;
+font-size: 30px;
+font-weight: bold;
+font-family: Arial, Helvetica, sans-serif
+}
+
+</style>
+
+
+</head>
+
+
+<body>
+    <h1>Sino-Tibetan Language Family Development</h1>
+
+    <div class="slidecontainer">
+        <input type="range" min="-7200" max="0" step="100" value="1" class="slider" id="myRange">
+         <span id="demo"></span> Years Before Present
+    </div>
+
+    <div id="container">
+        <div id="map"></div>
+        <div id="phylogenetictree"> <img src="./data/phyloTree.jpeg" alt="Sino-Tibetan Language Family Phylogenetic Tree" width=100% height=100%>
+        </div>
+    </div>
+    
+
+</body>
+
+<script>
+        var map = L.map('map').setView([29.5657, 100], 4); // YOU CAN CHANGE THE ZOOM
+
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; National Geographic, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC',
+	maxZoom: 7
+    }).addTo(map);
+
+//var ospreyIcon = L.icon({
+  //  iconSize: [15,15], // size of the icon
+  //  popupAnchor: [0,0] // where the icon is located relative to the lat lon of the point. 
+   // });
+
+//    function getColor(d) {
+//        return{
+//          if (d.Subfamily="Tibeto-Dulong") {"orange"}
+//         else {"blue"} ;
+//         return d.Year_Diverged > currentYear ? "orange" : // The getColor has a parameter d which in our case is the value of a Year. If the Year is less than the Year selected in the slider, then we get blue, otherwise it returns gray
+//                     "blue" ;
+//        }
+//           }
+
+function getColor(d) {
+        return d.Subfamily == "Tibeto-Dulong" ? "#eeaa3b"
+        :d.Name=="Tibeto-Dulong" ? "#eeaa3b"
+       :d.Subfamily=="Kiranti" ? "#6ea437"
+       :d.Name=="Kiranti" ? "#6ea437"
+       :d.Subfamily=="Tani-Yidu" ? "#0a8c6b"
+       :d.Name=="Tani-Yidu" ? "#0a8c6b"
+       :d.Subfamily == "West Himalayish" ? "#adb123"
+       :d.Name=="Rongpo" ?  "#adb123"
+       :d.Name=="West-Himalayish" ? "#adb123"
+       :d.Subfamily == "Sinitic"  ? "#b567ba"//91529e"
+       :d.Name=="Sinitic" ? "#b567ba"
+       :d.Subfamily == "Kuki-Karbi" ? "#9874e6" 
+       :d.Name == "Kuki-Karbi" ? "#9874e6" 
+       :d.Subfamily == "Sal" ? "#b24976"
+       :d.Name == "Sal" ? "#b24976"
+       :d.Name == "Proto-Sino-Tibetan" ? "lightcoral"
+       : "white";
+  }
+
+function getRadius(e){
+    return e.Type=="Family" ? 37
+    :e.Type=="Sub-family" ? 20
+    :e.Type=="Sub-sub-family" ? 12
+    :e.Type=="Language" ? 6
+    : 6;
+}
+
+function getWeight(f){
+    return f.Type=="Family" ? 2
+    :f.Type=="Sub-family" ? 1.8
+    :f.Type=="Sub-sub-family" ? 1.5
+    :f.Type=="Language" ? 0.7
+    : 0.7;
+}
+
+function getLineColor(g){
+    return g.Type=="Family" ? "Red"
+    :g.Type=="Sub-family" ? "White"
+    :g.Name=="Tibetan" ? "Purple"
+    :g["Sino-Tibetan Phylogeny_Sub-sub-family"]=="Tibetan" ? "Purple"
+    :g.Name=="Gyalrongic" ? "Green"
+    :g["Sino-Tibetan Phylogeny_Sub-sub-family"]=="Gyalrongic" ? "Green"
+    :g.Name=="Lolo-Burmese" ? "Blue"
+    :g["Sino-Tibetan Phylogeny_Sub-sub-family"]=="Lolo-Burmese" ? "Blue"
+    :g.Type=="Language" ? "Black"
+    : "Black";
+}
+  
+function getOpacity(f){
+    return f.Type=="Family" ? 0.6
+    :f.Type=="Sub-family" ? 0.7
+    :f.Type=="Sub-sub-family" ? 0.8
+    :f.Type=="Language" ? 0.9
+    : 0.9;
+}
+
+function myStyle(features) {
+        //console.log(features.properties.DATE) // This the property with the DATE value. 
+        return {
+    "fillColor": getColor(features.properties), // the color is obtained from the getColor function
+    "weight": getWeight(features.properties),
+    "fillOpacity": getOpacity(features.properties),
+    "radius": getRadius(features.properties),
+    "color": getLineColor(features.properties)
+        }
+    };
+
+    
+
+    //var geojson = L.geoJSON(annexations, {style: myStyle}).addTo(map); // the entire geojson is displayed
+
+    // function myPopup(a) {
+    //     return {
+    //         a.properties.Name,
+    //         "<br>Type:", a.properties.Type,
+    //         "</br><br>Sub-Family:", a.properties.Subfamily
+
+    //     }
+    // }
+
+var languageDevelopment = L.geoJSON(languagesPoints, {
+   style: myStyle,
+    pointToLayer: function (feature, latlng) {
+       // console.log(latlng)
+        return L.circleMarker(latlng,myStyle(feature))
+        .bindPopup(feature.properties.Name +  "<br>Type: " + feature.properties.Type + "<br> Sub-Family: " + feature.properties.Subfamily + "<br>Year Diverged: " + feature.properties.Year_Diverged
+
+        );
+    }
+});
+
+// var languageDevelopment = L.geoJSON(languagesPoints.features.properties.Sino-Tibetan_Phylogeny_Year_Diverged([-7200]), { // open just the first instance of the geojson; that is why I added the []
+   // pointToLayer: function (feature, latlng) { 
+   // return L.marker(latlng, {icon: ospreyIcon});}
+   // }).addTo(map);
+//map.addLayer(languageDevelopment) 
+
+var currentYear=-7200
+
+// function getFeaturesByYearDiverged(languagesData, targetYear) {
+//     // Filter features that match the target Year_Diverged
+//     const matchingFeatures = languagesData.features.filter(feature => {
+//         return feature.properties.Year_Diverged <= targetYear;
+//     });
+
+//     // Return the matching features with their properties
+//     return matchingFeatures.map(feature => ({
+//         id: feature.properties.id,
+//         Language: feature.properties.Language,
+//         Name: feature.properties.Name,
+//         Type: feature.properties.Type,
+//         Year_Diverged: feature.properties.Year_Diverged
+//         Subfamily: feature.properties.Subfamily,
+//         "Sino-Tibetan Phylogeny_Sub-sub-family": feature.properties["Sino-Tibetan Phylogeny_Sub-sub-family"],
+//         "Sino-Tibetan Phylogeny_Subgroup": feature.properties["Sino-Tibetan Phylogeny_Subgroup"],
+//         coordinates: feature.geometry.coordinates
+//     }));
+
+
+// }
+
+function getFeaturesByYearDiverged2(languagesData, targetYear) {
+    return languagesData.features.filter(feature => {
+        return feature.properties.Year_Diverged <= targetYear;
+    });
+}
+// **********  THIS SECTION IS WHERE MOST CHANGES ARE HAPPENING IN THE JS 
+
+var slider = document.getElementById("myRange");
+var output = document.getElementById("demo");
+
+
+
+slider.oninput = function() { // in this example I am adding the oninput method after the slider element has been created. 
+      console.log(this.value); // example for debugging
+      console.log(getFeaturesByYearDiverged2(languagesPoints,currentYear));
+    currentYear=this.value;
+    //languageDevelopment.resetStyle()
+        output.innerHTML = currentYear; // get the date value and assign it to the text
+      map.removeLayer(languageDevelopment);// remove the hurricane layer otherwise it will keep adding more and more elements
+      languageDevelopment = L.geoJSON(getFeaturesByYearDiverged2(languagesPoints,currentYear),//.slice(0,this.value), // select the values from 0 to the slider input using the slice array method
+      {pointToLayer: function (feature, latlng) { 
+      return L.circleMarker(latlng,myStyle(feature))
+      .bindPopup(feature.properties.Name +  "<br>Type: " + feature.properties.Type + "<br> Sub-Family: " + feature.properties.Subfamily + "<br>Year Diverged: " + feature.properties.Year_Diverged
+     );
+     }}); 
+      map.addLayer(languageDevelopment); 
+     }
+
+     window.onload = function() { 
+         slider.value = -7200;  
+ }; // I added this section to make sure that the slider goes back to the initial event after refreshing   
+// end of script
+
+</script>
+</html>
