@@ -107,20 +107,7 @@ L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_M
 	maxZoom: 7
     }).addTo(map);
 
-//var ospreyIcon = L.icon({
-  //  iconSize: [15,15], // size of the icon
-  //  popupAnchor: [0,0] // where the icon is located relative to the lat lon of the point. 
-   // });
-
-//    function getColor(d) {
-//        return{
-//          if (d.Subfamily="Tibeto-Dulong") {"orange"}
-//         else {"blue"} ;
-//         return d.Year_Diverged > currentYear ? "orange" : // The getColor has a parameter d which in our case is the value of a Year. If the Year is less than the Year selected in the slider, then we get blue, otherwise it returns gray
-//                     "blue" ;
-//        }
-//           }
-
+// *** STYLE FUNCTIONS ***
 function getColor(d) {
         return d.Subfamily == "Tibeto-Dulong" ? "#eeaa3b"
         :d.Name=="Tibeto-Dulong" ? "#eeaa3b"
@@ -178,8 +165,7 @@ function getOpacity(f){
     : 0.9;
 }
 
-function myStyle(features) {
-        //console.log(features.properties.DATE) // This the property with the DATE value. 
+function myStyle(features) { 
         return {
     "fillColor": getColor(features.properties), // the color is obtained from the getColor function
     "weight": getWeight(features.properties),
@@ -190,19 +176,8 @@ function myStyle(features) {
     };
 
     
-
-    //var geojson = L.geoJSON(annexations, {style: myStyle}).addTo(map); // the entire geojson is displayed
-
-    // function myPopup(a) {
-    //     return {
-    //         a.properties.Name,
-    //         "<br>Type:", a.properties.Type,
-    //         "</br><br>Sub-Family:", a.properties.Subfamily
-
-    //     }
-    // }
-
-var languageDevelopment = L.geoJSON(languagesPoints, {
+// *** GEOJSON ***
+var languageDevelopment = L.geoJSON(languagesPoints.features[50], { //opens Proto-Sino-Tibetan feature
    style: myStyle,
     pointToLayer: function (feature, latlng) {
        // console.log(latlng)
@@ -211,16 +186,12 @@ var languageDevelopment = L.geoJSON(languagesPoints, {
 
         );
     }
-});
+}).addTo(map);
 
-// var languageDevelopment = L.geoJSON(languagesPoints.features.properties.Sino-Tibetan_Phylogeny_Year_Diverged([-7200]), { // open just the first instance of the geojson; that is why I added the []
-   // pointToLayer: function (feature, latlng) { 
-   // return L.marker(latlng, {icon: ospreyIcon});}
-   // }).addTo(map);
-//map.addLayer(languageDevelopment) 
 
 var currentYear=-7200
 
+// *** OLD DEEPSEEK FUNCTION ***
 // function getFeaturesByYearDiverged(languagesData, targetYear) {
 //     // Filter features that match the target Year_Diverged
 //     const matchingFeatures = languagesData.features.filter(feature => {
@@ -240,19 +211,19 @@ var currentYear=-7200
 //         coordinates: feature.geometry.coordinates
 //     }));
 
-
 // }
 
+// *** DEEPSEEK FUNCTION TO SELECT LANGUAGES BEFORE AND AT SLIDER YEAR ***
 function getFeaturesByYearDiverged2(languagesData, targetYear) {
     return languagesData.features.filter(feature => {
         return feature.properties.Year_Diverged <= targetYear;
     });
 }
-// **********  THIS SECTION IS WHERE MOST CHANGES ARE HAPPENING IN THE JS 
+
+// *** SLIDER CONTROLLING POINTS *** 
 
 var slider = document.getElementById("myRange");
 var output = document.getElementById("demo");
-
 
 
 slider.oninput = function() { // in this example I am adding the oninput method after the slider element has been created. 
